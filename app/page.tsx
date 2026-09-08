@@ -24,16 +24,17 @@ const projects = [
 
 const skills = ["React", "Next", "Expo", "Django", "Express", "Node", "Bun", "PostgreSQL", "MongoDB", "Redis", "Prisma", "Zustand", "TanStack Query", "Postman", "Tailwind", "shadcn", "Motion", "GSAP", "JavaScript", "TypeScript", "Python", "C/C++", "SQL", "Git", "Github", "Figma", "Docker", "Linux"];
 const contributionMonths = ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"];
-const featuredContribution: GitHubEvent = { id: "langchainjs-9674", type: "PullRequestEvent", repo: { name: "langchain-ai/langchainjs" }, payload: { pull_request: { title: "fix(mcp-adapters): bump @modelcontextprotocol/sdk to address CVE-2025-66414", state: "closed", merged_at: "2025-12-18T00:00:00Z", html_url: "https://github.com/langchain-ai/langchainjs/pull/9674" } } };
+const featuredContributions: GitHubEvent[] = [
+  { id: "langchainjs-9674", type: "PullRequestEvent", repo: { name: "langchain-ai/langchainjs" }, payload: { pull_request: { title: "fix(mcp-adapters): bump @modelcontextprotocol/sdk to address CVE-2025-66414", state: "closed", merged_at: "2025-12-18T00:00:00Z", html_url: "https://github.com/langchain-ai/langchainjs/pull/9674" } } },
+  { id: "langchainjs-9535", type: "PullRequestEvent", repo: { name: "langchain-ai/langchainjs" }, payload: { pull_request: { title: "LangChain.js pull request #9535", state: "closed", merged_at: null, html_url: "https://github.com/langchain-ai/langchainjs/pull/9535" } } },
+  { id: "rocketchat-3148", type: "PullRequestEvent", repo: { name: "RocketChat/Rocket.Chat.Electron" }, payload: { pull_request: { title: "Rocket.Chat.Electron pull request #3148", state: "open", html_url: "https://github.com/RocketChat/Rocket.Chat.Electron/pull/3148" } } },
+  { id: "langchainjs-9526", type: "PullRequestEvent", repo: { name: "langchain-ai/langchainjs" }, payload: { pull_request: { title: "LangChain.js pull request #9526", state: "open", html_url: "https://github.com/langchain-ai/langchainjs/pull/9526" } } },
+];
 
 function LogoMark() {
   return (
     <span className="logo-mark" aria-label="Nitin Yadav logo">N</span>
   );
-}
-
-function Arrow() {
-  return <span aria-hidden="true">-&gt;</span>;
 }
 
 function SocialIcon({ name }: { name: string }) {
@@ -115,7 +116,7 @@ function ComponentPreview({ kind }: { kind: string }) {
     return <div className="preview logos-preview"><span>▲ vercel</span><span>● 1Password</span><span>✳ Claude</span><span>◼ OpenPanel</span></div>;
   }
   if (kind === "directory") {
-    return <div className="preview directory-preview">{["portfolio", "github", "linkedin", "notes", "email", "resume"].map((item) => <div key={item}><b />{item}<small>-&gt;</small></div>)}</div>;
+    return <div className="preview directory-preview">{["portfolio", "github", "linkedin", "notes", "email", "resume"].map((item) => <div key={item}><b />{item}</div>)}</div>;
   }
   if (kind === "analytics") {
     return <div className="preview analytics-preview"><div className="chart-bars">{[24, 42, 34, 58, 46, 78, 64, 88, 74].map((h, i) => <i key={i} style={{ height: `${h}%` }} />)}</div><svg viewBox="0 0 300 80" aria-hidden="true"><path d="M0 65 C28 63 32 42 56 48 S85 62 106 39 S137 48 160 28 S194 50 218 23 S252 27 300 9" /></svg></div>;
@@ -182,7 +183,7 @@ export default function Home() {
     return () => window.clearInterval(timer);
   }, []);
 
-  const visibleEvents = [featuredContribution, ...githubEvents.filter((event) => event.id !== featuredContribution.id)].filter((event) => {
+  const visibleEvents = [...featuredContributions, ...githubEvents.filter((event) => !featuredContributions.some((featured) => featured.id === event.id))].filter((event) => {
     const pullRequest = event.payload.pull_request;
     if (pullRequest) {
       if (contributionTab === "Merged") return Boolean(pullRequest.merged_at);
@@ -215,7 +216,7 @@ export default function Home() {
           </div>
           <div className="identity">
             <div className="avatar" aria-label="Nitin Yadav profile photo"><img src="/nitinreal.png" alt="Nitin Yadav" /></div>
-            <div className="identity-copy"><h1>Nitin Yadav <span className="verified">◆</span></h1><p>Creating with code. Small details matter.</p></div>
+            <div className="identity-copy"><h1>Nitin Yadav <span className="focus-status"><i />focusing</span></h1><p>Creating with code. Small details matter.</p></div>
           </div>
         </section>
 
@@ -229,7 +230,7 @@ export default function Home() {
           <div className="info-list">
             <p><span className="info-icon">◷</span> {currentTime} <small>// India time</small></p>
             <p><span className="info-icon">✉</span> <a className="info-link" href="mailto:nitinyadav484220@gmail.com">nitinyadav484220@gmail.com</a></p>
-            <p><span className="info-icon">↗</span> nitinyadav.dev</p>
+            <p><span className="info-icon">●</span> nitinyadav.dev</p>
             <p><span className="info-icon">◉</span> he / him</p>
           </div>
         </section>
@@ -260,10 +261,10 @@ export default function Home() {
 
         <div className="stripe" />
         <section className="section-block" id="projects">
-          <div className="project-note">building in public <span>↘</span></div>
-          <div className="section-action"><a href="#projects">All projects <Arrow /></a></div>
+          <div className="project-note">building in public</div>
+          <div className="section-action"><a href="#projects">All projects</a></div>
           <div className="section-title"><h2>Projects <sup>(04)</sup></h2><span>01 / 03</span></div>
-          <div className="card-grid project-grid">{projects.map((item) => <article className="project-card" key={item.number} onClick={() => setSelectedProject(item)}><div className="project-image"><img src={item.image} alt={`${item.title} project preview`} /><button aria-label={`Pin ${item.title}`} className="pin-button" onClick={(event) => event.stopPropagation()}>♧</button></div><div className="project-copy"><div className="project-heading"><h3>{item.title}</h3></div><p>{item.description}</p><div className="project-footer"><div className="tech-list">{item.tech.map((tech) => <span key={tech} title={tech}><TechIcon name={tech} /></span>)}</div><a href="#contact" onClick={(event) => { event.preventDefault(); setSelectedProject(item); }}>View Project ↗</a></div></div></article>)}</div>
+          <div className="card-grid project-grid">{projects.map((item) => <article className="project-card" key={item.number} onClick={() => setSelectedProject(item)}><div className="project-image"><img src={item.image} alt={`${item.title} project preview`} /><button aria-label={`Pin ${item.title}`} className="pin-button" onClick={(event) => event.stopPropagation()}>♧</button></div><div className="project-copy"><div className="project-heading"><h3>{item.title}</h3></div><p>{item.description}</p><div className="project-footer"><div className="tech-list">{item.tech.map((tech) => <span key={tech} title={tech}><TechIcon name={tech} /></span>)}</div><a href="#contact" onClick={(event) => { event.preventDefault(); setSelectedProject(item); }}>View Project</a></div></div></article>)}</div>
         </section>
 
         <div className="stripe" />
@@ -272,13 +273,13 @@ export default function Home() {
           <div className="skills-grid">{skills.map((skill) => <span key={skill}><SkillIcon name={skill} />{skill}</span>)}</div>
         </section>
 
-        <section className="support" id="contact"><div><span className="eyebrow">Have a good idea?</span><h2>Let&apos;s make it real.</h2></div><a href="mailto:nitin@nitinyadav.dev">Say hello <Arrow /></a></section>
-        <footer><span>© 2026 Nitin Yadav</span><div><a href="#top">Back to top ↑</a><a href="https://github.com" target="_blank" rel="noreferrer">GitHub ↗</a><a href="https://linkedin.com" target="_blank" rel="noreferrer">LinkedIn ↗</a></div></footer>
+        <section className="support" id="contact"><div><span className="eyebrow">Have a good idea?</span><h2>Let&apos;s make it real.</h2></div><a href="mailto:nitin@nitinyadav.dev">Say hello</a></section>
+        <footer><span>© 2026 Nitin Yadav</span><div><a href="#top">Back to top</a><a href="https://github.com" target="_blank" rel="noreferrer">GitHub</a><a href="https://linkedin.com" target="_blank" rel="noreferrer">LinkedIn</a></div></footer>
       </div>
 
       <button className="back-top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} aria-label="Back to top">↑</button>
-      {showSearch && <div className="search-overlay" onClick={() => setShowSearch(false)}><div className="search-dialog navigation-dialog" onClick={(event) => event.stopPropagation()}><div className="navigation-header"><span className="navigation-icon">▦</span><div><strong>Navigation Menu</strong><small>Quickly jump to sections or actions</small></div><button onClick={() => setShowSearch(false)} aria-label="Close navigation">×</button></div><div className="navigation-search"><span className="magnifier" /><input autoFocus placeholder="Search for actions..." /></div><p className="navigation-label">Sections</p><div className="navigation-list">{[["▥", "Experience", "shift + E", "#about"], ["‹›", "Projects", "shift + P", "#projects"], ["▤", "Blogs", "shift + B", "#projects"], ["●", "Open Source", "shift + O", "#opensource"], ["▱", "Skills", "shift + S", "#skills"]].map(([icon, label, shortcut, href]) => <a key={label} href={href} onClick={() => setShowSearch(false)}><span className="navigation-item-icon">{icon}</span><span>{label}</span><kbd>{shortcut}</kbd></a>)}</div><div className="navigation-footer"><span>↑ ↓ to navigate</span><span>↵ to select</span><span>esc to close</span></div></div></div>}
-      {selectedProject && <div className="project-detail-overlay"><div className="project-detail-page"><div className="project-detail-top"><button className="detail-back" onClick={() => setSelectedProject(null)}>←</button><div><h2>{selectedProject.title}</h2><p>Projects / {selectedProject.title}</p></div><span className={`project-status ${selectedProject.tone}`}><i />{selectedProject.status}</span></div><div className="detail-media"><img src={selectedProject.image} alt={`${selectedProject.title} project preview`} /><span className="detail-play">▶</span></div><div className="detail-actions">{selectedProject.github && <a href={selectedProject.github} target="_blank" rel="noreferrer">◉ Github</a>}{selectedProject.website && <a href={selectedProject.website} target="_blank" rel="noreferrer">↗ Website</a>}<a href="#contact">✉ Contact</a></div><div className="detail-summary"><div><h1>{selectedProject.title}</h1><p>{selectedProject.description}</p></div><div><h3>Stack used</h3><div className="detail-stack">{selectedProject.tech.map((tech) => <span key={tech}><TechIcon name={tech} />{tech}</span>)}</div></div></div></div></div>}
+      {showSearch && <div className="search-overlay" onClick={() => setShowSearch(false)}><div className="search-dialog navigation-dialog" onClick={(event) => event.stopPropagation()}><div className="navigation-header"><span className="navigation-icon">▦</span><div><strong>Navigation Menu</strong><small>Quickly jump to sections or actions</small></div><button onClick={() => setShowSearch(false)} aria-label="Close navigation">×</button></div><div className="navigation-search"><span className="magnifier" /><input autoFocus placeholder="Search for actions..." /></div><p className="navigation-label">Sections</p><div className="navigation-list">{[["▥", "Experience", "shift + E", "#about"], ["‹›", "Projects", "shift + P", "#projects"], ["▤", "Blogs", "shift + B", "#projects"], ["●", "Open Source", "shift + O", "#opensource"], ["▱", "Skills", "shift + S", "#skills"]].map(([icon, label, shortcut, href]) => <a key={label} href={href} onClick={() => setShowSearch(false)}><span className="navigation-item-icon">{icon}</span><span>{label}</span><kbd>{shortcut}</kbd></a>)}</div><div className="navigation-footer"><span>Navigate</span><span>select</span><span>esc to close</span></div></div></div>}
+      {selectedProject && <div className="project-detail-overlay"><div className="project-detail-page"><div className="project-detail-top"><button className="detail-back" onClick={() => setSelectedProject(null)}>Back</button><div><h2>{selectedProject.title}</h2><p>Projects / {selectedProject.title}</p></div><span className={`project-status ${selectedProject.tone}`}><i />{selectedProject.status}</span></div><div className="detail-media"><img src={selectedProject.image} alt={`${selectedProject.title} project preview`} /><span className="detail-play">▶</span></div><div className="detail-actions">{selectedProject.github && <a href={selectedProject.github} target="_blank" rel="noreferrer">◉ Github</a>}{selectedProject.website && <a href={selectedProject.website} target="_blank" rel="noreferrer">Website</a>}<a href="#contact">✉ Contact</a></div><div className="detail-summary"><div><h1>{selectedProject.title}</h1><p>{selectedProject.description}</p></div><div><h3>Stack used</h3><div className="detail-stack">{selectedProject.tech.map((tech) => <span key={tech}><TechIcon name={tech} />{tech}</span>)}</div></div></div></div></div>}
     </main>
   );
 }
