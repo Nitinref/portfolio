@@ -23,6 +23,7 @@ const projects = [
 ];
 
 const skills = ["React", "Next", "Expo", "Django", "Express", "Node", "Bun", "PostgreSQL", "MongoDB", "Redis", "Prisma", "Zustand", "TanStack Query", "Postman", "Tailwind", "shadcn", "Motion", "GSAP", "JavaScript", "TypeScript", "Python", "C/C++", "SQL", "Git", "Github", "Figma", "Docker", "Linux"];
+const contributionMonths = ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"];
 const featuredContribution: GitHubEvent = { id: "langchainjs-9674", type: "PullRequestEvent", repo: { name: "langchain-ai/langchainjs" }, payload: { pull_request: { title: "fix(mcp-adapters): bump @modelcontextprotocol/sdk to address CVE-2025-66414", state: "closed", merged_at: "2025-12-18T00:00:00Z", html_url: "https://github.com/langchain-ai/langchainjs/pull/9674" } } };
 
 function LogoMark() {
@@ -87,6 +88,25 @@ function SkillIcon({ name }: { name: string }) {
   return <SiReact />;
 }
 
+function playThemeSound() {
+  const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!AudioContextClass) return;
+  const context = new AudioContextClass();
+  const oscillator = context.createOscillator();
+  const gain = context.createGain();
+  oscillator.type = "sine";
+  oscillator.frequency.setValueAtTime(520, context.currentTime);
+  oscillator.frequency.exponentialRampToValueAtTime(760, context.currentTime + 0.12);
+  gain.gain.setValueAtTime(0.0001, context.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.06, context.currentTime + 0.015);
+  gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.16);
+  oscillator.connect(gain);
+  gain.connect(context.destination);
+  oscillator.start();
+  oscillator.stop(context.currentTime + 0.17);
+  window.setTimeout(() => void context.close(), 220);
+}
+
 function ComponentPreview({ kind }: { kind: string }) {
   if (kind === "game") {
     return <div className="preview game-preview"><div className="game-bricks">{Array.from({ length: 12 }).map((_, i) => <i key={i} />)}</div><span className="game-ball" /><span className="game-paddle" /></div>;
@@ -109,12 +129,24 @@ function ComponentPreview({ kind }: { kind: string }) {
 export default function Home() {
   const [dark, setDark] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
-  const [contributions, setContributions] = useState<Contribution[]>([]);
+  const [realContributions, setRealContributions] = useState<Contribution[]>([]);
+  const [contributionTotal, setContributionTotal] = useState<number | null>(null);
   const [githubEvents, setGithubEvents] = useState<GitHubEvent[]>([]);
   const [eventsLoaded, setEventsLoaded] = useState(false);
   const [contributionTab, setContributionTab] = useState("Merged");
   const [selectedProject, setSelectedProject] = useState<(typeof projects)[number] | null>(null);
   const [currentTime, setCurrentTime] = useState("--:--:-- --");
+
+  useEffect(() => {
+    fetch("https://github-contributions-api.jogruber.de/v4/Nitinref?y=last")
+      .then((response) => response.json())
+      .then((data) => {
+        const values = Array.isArray(data.contributions) ? data.contributions : [];
+        setRealContributions(values);
+        setContributionTotal(values.reduce((total: number, item: Contribution) => total + item.count, 0));
+      })
+      .catch(() => setContributionTotal(0));
+  }, []);
 
   useEffect(() => {
     document.documentElement.dataset.theme = dark ? "dark" : "light";
@@ -150,7 +182,6 @@ export default function Home() {
     return () => window.clearInterval(timer);
   }, []);
 
-  const contributionTotal = contributions.reduce((total, item) => total + item.count, 0);
   const visibleEvents = [featuredContribution, ...githubEvents.filter((event) => event.id !== featuredContribution.id)].filter((event) => {
     const pullRequest = event.payload.pull_request;
     if (pullRequest) {
@@ -171,7 +202,7 @@ export default function Home() {
         <div className="toolbar">
           <button className="search-trigger" onClick={() => setShowSearch(true)} aria-label="Open search"><span className="magnifier" /><kbd>Ctrl</kbd><kbd>K</kbd></button>
           <span className="toolbar-divider" />
-          <button className="theme-toggle" onClick={() => setDark((value) => !value)} aria-label="Toggle theme">☼</button>
+          <button className="theme-toggle" onClick={() => { playThemeSound(); setDark((value) => !value); }} aria-label="Toggle theme">☼</button>
         </div>
       </header>
 
@@ -183,7 +214,7 @@ export default function Home() {
             <span className="figure-label">Fig. 1.</span>
           </div>
           <div className="identity">
-            <div className="avatar" aria-label="Nitin Yadav initial">N</div>
+            <div className="avatar" aria-label="Nitin Yadav profile photo"><img src="/nitinreal.png" alt="Nitin Yadav" /></div>
             <div className="identity-copy"><h1>Nitin Yadav <span className="verified">◆</span></h1><p>Creating with code. Small details matter.</p></div>
           </div>
         </section>
@@ -214,6 +245,11 @@ export default function Home() {
               <a href="https://discord.com/app" target="_blank" rel="noreferrer" aria-label="Discord: nitin2319" title="Discord: nitin2319" data-tooltip="Discord (nitin2319)"><SocialIcon name="discord" /></a>
               <a href="/resume" target="_blank" rel="noreferrer" aria-label="Resume" title="Resume" data-tooltip="Resume"><SocialIcon name="resume" /></a>
             </div>
+          </div>
+          <div className="contributions" aria-label="GitHub contributions">
+            <div className="month-row">{contributionMonths.map((month) => <span key={month}>{month}</span>)}</div>
+            <div className="contribution-grid">{Array.from({ length: 364 }, (_, index) => <i className={`level-${realContributions[index]?.level ?? 0}`} key={realContributions[index]?.date ?? index} />)}</div>
+            <div className="contribution-caption"><span>Fig. 2.</span><strong>{contributionTotal === null ? "Loading..." : `${contributionTotal} contributions`}</strong><span>last 12 months. Source:</span><a href="https://github.com/Nitinref" target="_blank" rel="noreferrer">GitHub</a><div className="legend"><small>Less</small><i /><i className="level-1" /><i className="level-2" /><i className="level-3" /><i className="level-4" /><small>More</small></div></div>
           </div>
           <div className="open-source-contributions" id="opensource">
             <div className="open-source-heading"><h2>Open Source Contributions</h2><div className="contribution-tabs">{["Merged", "Open", "Closed"].map((tab) => <button key={tab} className={contributionTab === tab ? "active" : ""} onClick={() => setContributionTab(tab)}>{tab}</button>)}</div></div>
