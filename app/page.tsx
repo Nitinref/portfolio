@@ -1,6 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
+import { flushSync } from "react-dom";
+import { useTextGenerateEffect } from "@/components/ui/text-generate-effect";
+import LLMInferenceFlow from "@/components/ui/llm-inference-flow";
+import NitinSignature from "@/components/ui/nitin-signature";
 import { SiBun, SiCplusplus, SiDjango, SiDocker, SiExpo, SiExpress, SiFigma, SiFramer, SiGit, SiGithub, SiGreensock, SiJavascript, SiLinux, SiMdx, SiMongodb, SiMysql, SiNextdotjs, SiNodedotjs, SiOpenrouter, SiPostgresql, SiPostman, SiPrisma, SiPython, SiReact, SiReactquery, SiRedis, SiShadcnui, SiTailwindcss, SiTypescript } from "react-icons/si";
 
 type Contribution = { date: string; count: number; level: number };
@@ -30,12 +34,6 @@ const featuredContributions: GitHubEvent[] = [
   { id: "rocketchat-3148", type: "PullRequestEvent", repo: { name: "RocketChat/Rocket.Chat.Electron" }, payload: { pull_request: { title: "Rocket.Chat.Electron pull request #3148", state: "open", html_url: "https://github.com/RocketChat/Rocket.Chat.Electron/pull/3148" } } },
   { id: "langchainjs-9526", type: "PullRequestEvent", repo: { name: "langchain-ai/langchainjs" }, payload: { pull_request: { title: "LangChain.js pull request #9526", state: "open", html_url: "https://github.com/langchain-ai/langchainjs/pull/9526" } } },
 ];
-
-function LogoMark() {
-  return (
-    <span className="logo-mark" aria-label="Nitin Yadav logo">N</span>
-  );
-}
 
 function SocialIcon({ name }: { name: string }) {
   if (name === "x") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4l14 16M19 4L5 20" /></svg>;
@@ -128,6 +126,8 @@ function ComponentPreview({ kind }: { kind: string }) {
 }
 
 export default function Home() {
+  useTextGenerateEffect();
+
   const [dark, setDark] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [realContributions, setRealContributions] = useState<Contribution[]>([]);
@@ -183,6 +183,29 @@ export default function Home() {
     return () => window.clearInterval(timer);
   }, []);
 
+  const toggleTheme = (event: MouseEvent<HTMLButtonElement>) => {
+    playThemeSound();
+    const nextDark = !dark;
+    const root = document.documentElement;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    root.style.setProperty("--theme-origin-x", `${bounds.left + bounds.width / 2}px`);
+    root.style.setProperty("--theme-origin-y", `${bounds.top + bounds.height / 2}px`);
+
+    const updateTheme = () => flushSync(() => {
+      root.dataset.theme = nextDark ? "dark" : "light";
+      setDark(nextDark);
+    });
+    const transitionDocument = document as Document & {
+      startViewTransition?: (callback: () => void) => void;
+    };
+
+    if (transitionDocument.startViewTransition) {
+      transitionDocument.startViewTransition(updateTheme);
+    } else {
+      updateTheme();
+    }
+  };
+
   const visibleEvents = [...featuredContributions, ...githubEvents.filter((event) => !featuredContributions.some((featured) => featured.id === event.id))].filter((event) => {
     const pullRequest = event.payload.pull_request;
     if (pullRequest) {
@@ -197,26 +220,13 @@ export default function Home() {
   return (
     <main className="site-shell">
       <div className="paper-grid" />
-      <header className="topbar">
-        <a href="#top" className="brand"><LogoMark /></a>
-        <nav><a href="#projects">Projects</a><a href="#skills">Skills</a><a href="#about">About</a><a href="#contact">Contact</a></nav>
-        <div className="toolbar">
-          <button className="search-trigger" onClick={() => setShowSearch(true)} aria-label="Open search"><span className="magnifier" /><kbd>Ctrl</kbd><kbd>K</kbd></button>
-          <span className="toolbar-divider" />
-          <button className="theme-toggle" onClick={() => { playThemeSound(); setDark((value) => !value); }} aria-label="Toggle theme">☼</button>
-        </div>
-      </header>
+      <button className="theme-toggle floating-theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">☼</button>
 
       <div className="content-column" id="top">
         <section className="hero">
-          <div className="hero-art" aria-label="Abstract Nitin Yadav logo">
-            <div className="isometric-logo"><img src="/ascii-magic-2.jpg" alt="ASCII art landscape created by Nitin Yadav" /></div>
-            <span className="annotation annotation-right"><span>follows your cursor<br />click for a sound</span></span>
-            <span className="figure-label">Fig. 1.</span>
-          </div>
           <div className="identity">
             <div className="avatar" aria-label="Nitin Yadav profile photo"><img src="/nitinreal.png" alt="Nitin Yadav" /></div>
-            <div className="identity-copy"><h1>Nitin Yadav <span className="focus-status"><i />focusing</span></h1><p>Creating with code. Small details matter.</p></div>
+            <div className="identity-copy"><h1>Nitin Yadav</h1><p>Creating with code. Small details matter.</p></div>
           </div>
         </section>
 
@@ -273,8 +283,13 @@ export default function Home() {
           <div className="skills-grid">{skills.map((skill) => <span key={skill}><SkillIcon name={skill} />{skill}</span>)}</div>
         </section>
 
+        <LLMInferenceFlow />
+
         <section className="support" id="contact"><div><span className="eyebrow">Have a good idea?</span><h2>Let&apos;s make it real.</h2></div><a href="mailto:nitin@nitinyadav.dev">Say hello</a></section>
-        <footer><span>© 2026 Nitin Yadav</span><div><a href="#top">Back to top</a><a href="https://github.com" target="_blank" rel="noreferrer">GitHub</a><a href="https://linkedin.com" target="_blank" rel="noreferrer">LinkedIn</a></div></footer>
+        <footer>
+          <NitinSignature />
+          <div className="footer-meta"><span>© 2026 Nitin Yadav</span><div><a href="#top">Back to top</a><a href="https://github.com" target="_blank" rel="noreferrer">GitHub</a><a href="https://linkedin.com" target="_blank" rel="noreferrer">LinkedIn</a></div></div>
+        </footer>
       </div>
 
       <button className="back-top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} aria-label="Back to top">↑</button>
