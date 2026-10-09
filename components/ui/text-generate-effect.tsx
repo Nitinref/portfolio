@@ -1,37 +1,17 @@
 "use client";
 
 import { useEffect } from "react";
+import { motion, stagger, useAnimate } from "motion/react";
+import { cn } from "@/lib/utils";
 
-/** Reveals the hero once, then repeats the reveal for sections below it. */
-export function useTextGenerateEffect() {
+export const TextGenerateEffect = ({ words, className, filter = true, duration = 0.5 }: { words: string; className?: string; filter?: boolean; duration?: number }) => {
+  const [scope, animate] = useAnimate();
+  const wordsArray = words.split(" ");
+
   useEffect(() => {
-    const sections = document.querySelectorAll<HTMLElement>(
-      ".content-column > section",
-    );
+    if (!scope.current) return;
+    void animate("span", { opacity: 1, filter: filter ? "blur(0px)" : "none" }, { duration: duration || 1, delay: stagger(0.08) });
+  }, [animate, duration, filter, scope]);
 
-    if (!("IntersectionObserver" in window)) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const isHero = entry.target.classList.contains("hero");
-
-          if (entry.isIntersecting) {
-            entry.target.setAttribute("data-text-revealed", "true");
-            if (isHero) observer.unobserve(entry.target);
-          } else if (!isHero) {
-            entry.target.removeAttribute("data-text-revealed");
-          }
-        });
-      },
-      { threshold: 0.08, rootMargin: "0px 0px -4% 0px" },
-    );
-
-    sections.forEach((section) => {
-      section.setAttribute("data-text-reveal", "true");
-      observer.observe(section);
-    });
-
-    return () => observer.disconnect();
-  }, []);
-}
+  return <div className={cn("font-bold", className)}><div className="mt-0 text-inherit leading-snug tracking-wide"><motion.div ref={scope}>{wordsArray.map((word, index) => <motion.span key={`${word}-${index}`} className="opacity-0" style={{ filter: filter ? "blur(10px)" : "none" }}>{word}{" "}</motion.span>)}</motion.div></div></div>;
+};

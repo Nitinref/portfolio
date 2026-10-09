@@ -2,13 +2,27 @@
 
 import { useEffect, useState, type MouseEvent } from "react";
 import { flushSync } from "react-dom";
-import { useTextGenerateEffect } from "@/components/ui/text-generate-effect";
+import { useTextGenerateEffect } from "@/components/ui/use-text-generate-effect";
+import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
 import LLMInferenceFlow from "@/components/ui/llm-inference-flow";
 import NitinSignature from "@/components/ui/nitin-signature";
 import { SiBun, SiCplusplus, SiDjango, SiDocker, SiExpo, SiExpress, SiFigma, SiFramer, SiGit, SiGithub, SiGreensock, SiJavascript, SiLinux, SiMdx, SiMongodb, SiMysql, SiNextdotjs, SiNodedotjs, SiOpenrouter, SiPostgresql, SiPostman, SiPrisma, SiPython, SiReact, SiReactquery, SiRedis, SiShadcnui, SiTailwindcss, SiTypescript } from "react-icons/si";
 
 type Contribution = { date: string; count: number; level: number };
 type GitHubEvent = { id: string; type: string; repo: { name: string }; payload: { action?: string; ref?: string; commits?: unknown[]; pull_request?: { title: string; state: string; merged_at?: string | null; html_url: string }; issue?: { title: string; html_url: string } } };
+
+const heroRoles = ["Full-Stack Developer.", "AI Engineer."];
+
+function RotatingHeroRole() {
+  const [roleIndex, setRoleIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setRoleIndex((index) => (index + 1) % heroRoles.length), 4200);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  return <TextGenerateEffect key={heroRoles[roleIndex]} words={heroRoles[roleIndex]} duration={0.35} className="hero-role-effect" />;
+}
 
 const components = [
   { number: "01", title: "Not Found 01", description: "A 404 page with a playable brick breaker game.", kind: "game" },
@@ -27,7 +41,12 @@ const projects = [
 ];
 
 const skills = ["React", "Next", "Expo", "Django", "Express", "Node", "Bun", "PostgreSQL", "MongoDB", "Redis", "Prisma", "Zustand", "TanStack Query", "Postman", "Tailwind", "shadcn", "Motion", "GSAP", "JavaScript", "TypeScript", "Python", "C/C++", "SQL", "Git", "Github", "Figma", "Docker", "Linux"];
-const contributionMonths = ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"];
+const contributionMonths = Array.from({ length: 12 }, (_, index) => {
+  const date = new Date();
+  date.setDate(1);
+  date.setMonth(date.getMonth() - 11 + index);
+  return new Intl.DateTimeFormat("en-US", { month: "short" }).format(date);
+});
 const featuredContributions: GitHubEvent[] = [
   { id: "langchainjs-9674", type: "PullRequestEvent", repo: { name: "langchain-ai/langchainjs" }, payload: { pull_request: { title: "fix(mcp-adapters): bump @modelcontextprotocol/sdk to address CVE-2025-66414", state: "closed", merged_at: "2025-12-18T00:00:00Z", html_url: "https://github.com/langchain-ai/langchainjs/pull/9674" } } },
   { id: "langchainjs-9535", type: "PullRequestEvent", repo: { name: "langchain-ai/langchainjs" }, payload: { pull_request: { title: "LangChain.js pull request #9535", state: "closed", merged_at: null, html_url: "https://github.com/langchain-ai/langchainjs/pull/9535" } } },
@@ -128,7 +147,7 @@ function ComponentPreview({ kind }: { kind: string }) {
 export default function Home() {
   useTextGenerateEffect();
 
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(true);
   const [showSearch, setShowSearch] = useState(false);
   const [realContributions, setRealContributions] = useState<Contribution[]>([]);
   const [contributionTotal, setContributionTotal] = useState<number | null>(null);
@@ -137,6 +156,9 @@ export default function Home() {
   const [contributionTab, setContributionTab] = useState("Merged");
   const [selectedProject, setSelectedProject] = useState<(typeof projects)[number] | null>(null);
   const [currentTime, setCurrentTime] = useState("--:--:-- --");
+  const [orderedProjects, setOrderedProjects] = useState(projects);
+  const [draggingProject, setDraggingProject] = useState<string | null>(null);
+  const [turningToProjects, setTurningToProjects] = useState(false);
 
   useEffect(() => {
     fetch("https://github-contributions-api.jogruber.de/v4/Nitinref?y=last")
@@ -206,6 +228,26 @@ export default function Home() {
     }
   };
 
+  const moveProject = (targetTitle: string) => {
+    if (!draggingProject || draggingProject === targetTitle) return;
+    setOrderedProjects((items) => {
+      const next = [...items];
+      const sourceIndex = next.findIndex((item) => item.title === draggingProject);
+      const targetIndex = next.findIndex((item) => item.title === targetTitle);
+      if (sourceIndex < 0 || targetIndex < 0) return items;
+      const [moved] = next.splice(sourceIndex, 1);
+      next.splice(targetIndex, 0, moved);
+      return next;
+    });
+  };
+
+  const openProjectsWithPageTurn = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    if (turningToProjects) return;
+    setTurningToProjects(true);
+    window.setTimeout(() => { window.location.href = "/projects"; }, 560);
+  };
+
   const visibleEvents = [...featuredContributions, ...githubEvents.filter((event) => !featuredContributions.some((featured) => featured.id === event.id))].filter((event) => {
     const pullRequest = event.payload.pull_request;
     if (pullRequest) {
@@ -218,15 +260,28 @@ export default function Home() {
   }).slice(0, 4);
 
   return (
-    <main className="site-shell">
+    <main className={`site-shell ${turningToProjects ? "page-turning" : ""}`}>
       <div className="paper-grid" />
+      <header className="topbar hero-topbar">
+        <nav><a href="#top" className="active">Home</a><a href="#about">About</a><a href="/projects" onClick={openProjectsWithPageTurn}>Projects</a><a href="#blogs">Blogs</a></nav>
+        <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">☼</button>
+      </header>
       <button className="theme-toggle floating-theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">☼</button>
 
       <div className="content-column" id="top">
         <section className="hero">
-          <div className="identity">
-            <div className="avatar" aria-label="Nitin Yadav profile photo"><img src="/nitinreal.png" alt="Nitin Yadav" /></div>
-            <div className="identity-copy"><h1>Nitin Yadav</h1><p>Creating with code. Small details matter.</p></div>
+          <div className="hero-intro">
+            <svg className="hero-arrow" viewBox="0 0 320 180" aria-hidden="true">
+              <path d="M10 27C72 5 136 23 133 78C130 130 91 151 60 137C28 122 41 77 77 72C128 64 171 91 210 113C239 130 264 137 294 139" />
+              <path d="M267 108L294 139L266 166" />
+            </svg>
+            <h1>Hey, I&apos;m <span className="hero-avatar"><img src="/nitinreal.png" alt="Nitin Yadav" /></span> Nitin</h1>
+            <div className="hero-copy">
+              <div className="hero-role"><span>I&apos;m a</span><RotatingHeroRole /></div>
+              <p>I build full products on my own, from the database up to <strong>deployment</strong>. I care a lot about the <strong>small stuff</strong>. Clean APIs, fast interfaces, interactions that actually <strong>feel right</strong>.</p>
+              <p>I mostly work with <strong>TypeScript</strong>, <strong>Next.js</strong>, <strong>React</strong>, and <strong>PostgreSQL</strong>.</p>
+              <p>Want to hire me? <a href="mailto:nitinyadav484220@gmail.com">Let&apos;s talk.</a> Based in Jabalpur, India.</p>
+            </div>
           </div>
         </section>
 
@@ -259,7 +314,7 @@ export default function Home() {
           </div>
           <div className="contributions" aria-label="GitHub contributions">
             <div className="month-row">{contributionMonths.map((month) => <span key={month}>{month}</span>)}</div>
-            <div className="contribution-grid">{Array.from({ length: 364 }, (_, index) => <i className={`level-${realContributions[index]?.level ?? 0}`} key={realContributions[index]?.date ?? index} />)}</div>
+            <div className="contribution-grid">{Array.from({ length: 364 }, (_, index) => { const contribution = realContributions[index]; const count = contribution?.count ?? 0; const date = contribution?.date ?? "Date unavailable"; return <i className={`level-${contribution?.level ?? 0}`} key={contribution?.date ?? index} title={`${count} contribution${count === 1 ? "" : "s"} on ${date}`} aria-label={`${count} contribution${count === 1 ? "" : "s"} on ${date}`} />; })}</div>
             <div className="contribution-caption"><span>Fig. 2.</span><strong>{contributionTotal === null ? "Loading..." : `${contributionTotal} contributions`}</strong><span>last 12 months. Source:</span><a href="https://github.com/Nitinref" target="_blank" rel="noreferrer">GitHub</a><div className="legend"><small>Less</small><i /><i className="level-1" /><i className="level-2" /><i className="level-3" /><i className="level-4" /><small>More</small></div></div>
           </div>
           <div className="open-source-contributions" id="opensource">
@@ -274,7 +329,7 @@ export default function Home() {
           <div className="project-note">building in public</div>
           <div className="section-action"><a href="#projects">All projects</a></div>
           <div className="section-title"><h2>Projects <sup>(04)</sup></h2><span>01 / 03</span></div>
-          <div className="card-grid project-grid">{projects.map((item) => <article className="project-card" key={item.number} onClick={() => setSelectedProject(item)}><div className="project-image"><img src={item.image} alt={`${item.title} project preview`} /><button aria-label={`Pin ${item.title}`} className="pin-button" onClick={(event) => event.stopPropagation()}>♧</button></div><div className="project-copy"><div className="project-heading"><h3>{item.title}</h3></div><p>{item.description}</p><div className="project-footer"><div className="tech-list">{item.tech.map((tech) => <span key={tech} title={tech}><TechIcon name={tech} /></span>)}</div><a href="#contact" onClick={(event) => { event.preventDefault(); setSelectedProject(item); }}>View Project</a></div></div></article>)}</div>
+          <div className="card-grid project-grid">{orderedProjects.map((item) => <article className={`project-card ${draggingProject === item.title ? "is-dragging" : ""}`} key={item.number} draggable onDragStart={() => setDraggingProject(item.title)} onDragOver={(event) => event.preventDefault()} onDrop={() => moveProject(item.title)} onDragEnd={() => setDraggingProject(null)} onClick={() => setSelectedProject(item)}><div className="project-image"><img src={item.image} alt={`${item.title} project preview`} /><button aria-label={`Pin ${item.title}`} className="pin-button" onClick={(event) => event.stopPropagation()}>♧</button></div><div className="project-copy"><div className="project-heading"><h3>{item.title}</h3></div><p>{item.description}</p><div className="project-footer"><div className="tech-list">{item.tech.map((tech) => <span key={tech} title={tech}><TechIcon name={tech} /></span>)}</div><a href="#contact" onClick={(event) => { event.preventDefault(); setSelectedProject(item); }}>View Project</a></div></div></article>)}</div>
         </section>
 
         <div className="stripe" />
