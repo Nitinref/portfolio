@@ -90,6 +90,8 @@
 @media(max-width:760px){.contributions{overflow-x:auto}.month-row,.contribution-grid{min-width:700px}.contribution-caption{display:none}}
 @media(max-width:760px){.contributions{scrollbar-width:none}.contributions::-webkit-scrollbar{display:none}}
 .contribution-grid i,.legend>i{background:#202936!important}.contribution-grid .level-1,.legend>i.level-1{background:#ffd6a5!important}.contribution-grid .level-2,.legend>i.level-2{background:#ffad66!important}.contribution-grid .level-3,.legend>i.level-3{background:#ff7a3d!important}.contribution-grid .level-4,.legend>i.level-4{background:#e84a1b!important}
+.detail-back{width:auto;min-width:76px;height:36px;padding:0 12px;line-height:1;white-space:nowrap}
+.project-card .project-status-visible{display:inline-flex;margin-top:10px}
 .projects-page{min-height:100vh;background:var(--bg);color:var(--ink);font-family:"DM Sans",sans-serif}
 .projects-nav{display:none}
 .projects-nav{height:62px;display:flex;align-items:center;justify-content:space-between;width:min(980px,calc(100% - 40px));margin:0 auto;border-bottom:1px solid var(--line)}

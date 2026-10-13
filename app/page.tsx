@@ -4,9 +4,8 @@ import { useEffect, useState, type MouseEvent } from "react";
 import { flushSync } from "react-dom";
 import { useTextGenerateEffect } from "@/components/ui/use-text-generate-effect";
 import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
-import LLMInferenceFlow from "@/components/ui/llm-inference-flow";
 import NitinSignature from "@/components/ui/nitin-signature";
-import { SiBun, SiCplusplus, SiDjango, SiDocker, SiExpo, SiExpress, SiFigma, SiFramer, SiGit, SiGithub, SiGreensock, SiJavascript, SiLinux, SiMdx, SiMongodb, SiMysql, SiNextdotjs, SiNodedotjs, SiOpenrouter, SiPostgresql, SiPostman, SiPrisma, SiPython, SiReact, SiReactquery, SiRedis, SiShadcnui, SiTailwindcss, SiTypescript } from "react-icons/si";
+import { SiBun, SiCplusplus, SiDjango, SiDocker, SiExpo, SiExpress, SiFigma, SiFramer, SiGit, SiGithub, SiGreensock, SiJavascript, SiLinux, SiMdx, SiMongodb, SiMysql, SiNextdotjs, SiNodedotjs, SiOpenrouter, SiPostgresql, SiPostman, SiPytorch, SiPrisma, SiPython, SiReact, SiReactquery, SiRedis, SiShadcnui, SiTailwindcss, SiTypescript } from "react-icons/si";
 
 type Contribution = { date: string; count: number; level: number };
 type GitHubEvent = { id: string; type: string; repo: { name: string }; payload: { action?: string; ref?: string; commits?: unknown[]; pull_request?: { title: string; state: string; merged_at?: string | null; html_url: string }; issue?: { title: string; html_url: string } } };
@@ -35,8 +34,8 @@ const components = [
 
 const projects = [
   { number: "01", title: "Sigato", image: "/sigato.png", description: "A terminal AI agent that plans and executes multi-step tasks by calling tools from your CLI - with your approval at every step.", status: "Live", tone: "live", stars: "128", website: "https://sigato.vercel.app/", github: "https://github.com/Nitinref/Sigato", tech: ["N", "React", "TS", "Next"] },
-  { number: "02", title: "Seezer.ai", image: "/seezer.png", description: "An AI-powered website builder that converts plain English prompts into production-ready React applications using multi-agent architecture, sandboxed execution, and real-time orchestration.", status: "Building", tone: "building", stars: "96", website: "https://seezer-ai.vercel.app/", github: "https://github.com/Nitinref/seezer.ai", tech: ["N", "AI", "TS", "API"] },
-  { number: "03", title: "DrawXL", image: "/drawxl.png", description: "A real-time collaborative whiteboard app, Excalidraw-inspired, built with Turborepo, WebSockets, and Prisma for live stroke syncing and persistence.", status: "Building", tone: "building", stars: "74", website: "", github: "", tech: ["N", "Canvas", "TS", "AI"] },
+  { number: "02", title: "GPT-2 Inference", image: "/GPT.png", description: "A from-scratch GPT-2 inference project in C++ and Python, using PyTorch to explore transformer architecture, token generation, and deep-learning performance.", status: "Building", tone: "building", stars: "—", website: "", github: "", tech: ["C/C++", "Python", "PyTorch", "DL"] },
+  { number: "03", title: "Seezer.ai", image: "/seezer.png", description: "An AI-powered website builder that converts plain English prompts into production-ready React applications using multi-agent architecture, sandboxed execution, and real-time orchestration.", status: "Building", tone: "building", stars: "96", website: "https://seezer-ai.vercel.app/", github: "https://github.com/Nitinref/seezer.ai", tech: ["N", "AI", "TS", "API"] },
   { number: "04", title: "Doco", image: "/doco.png", description: "A self-hosted container deployment engine. Deploy any Docker image and get a live subdomain instantly, built with Node.js, Next.js, and AWS EC2.", status: "Live", tone: "live", stars: "51", website: "", github: "https://github.com/Nitinref/Doco", tech: ["N", "MDX", "TS", "Docs"] },
 ];
 
@@ -69,6 +68,9 @@ function TechIcon({ name }: { name: string }) {
   if (name === "TS" || name === "TypeScript") return <SiTypescript />;
   if (name === "Next" || name === "N") return <SiNextdotjs />;
   if (name === "AI") return <SiOpenrouter />;
+  if (name === "C/C++") return <SiCplusplus />;
+  if (name === "Python" || name === "DL") return <SiPython />;
+  if (name === "PyTorch") return <SiPytorch />;
   if (name === "MDX") return <SiMdx />;
   if (name === "Canvas") return <SiJavascript />;
   if (name === "Tailwind") return <SiTailwindcss />;
@@ -155,10 +157,21 @@ export default function Home() {
   const [eventsLoaded, setEventsLoaded] = useState(false);
   const [contributionTab, setContributionTab] = useState("Merged");
   const [selectedProject, setSelectedProject] = useState<(typeof projects)[number] | null>(null);
+  const [projectScrollY, setProjectScrollY] = useState(0);
   const [currentTime, setCurrentTime] = useState("--:--:-- --");
   const [orderedProjects, setOrderedProjects] = useState(projects);
   const [draggingProject, setDraggingProject] = useState<string | null>(null);
   const [turningToProjects, setTurningToProjects] = useState(false);
+
+  const openProject = (project: (typeof projects)[number]) => {
+    setProjectScrollY(window.scrollY);
+    setSelectedProject(project);
+  };
+
+  const closeProject = () => {
+    setSelectedProject(null);
+    window.requestAnimationFrame(() => window.scrollTo({ top: projectScrollY, behavior: "auto" }));
+  };
 
   useEffect(() => {
     fetch("https://github-contributions-api.jogruber.de/v4/Nitinref?y=last")
@@ -328,8 +341,8 @@ export default function Home() {
         <section className="section-block" id="projects">
           <div className="project-note">building in public</div>
           <div className="section-action"><a href="#projects">All projects</a></div>
-          <div className="section-title"><h2>Projects <sup>(04)</sup></h2><span>01 / 03</span></div>
-          <div className="card-grid project-grid">{orderedProjects.map((item) => <article className={`project-card ${draggingProject === item.title ? "is-dragging" : ""}`} key={item.number} draggable onDragStart={() => setDraggingProject(item.title)} onDragOver={(event) => event.preventDefault()} onDrop={() => moveProject(item.title)} onDragEnd={() => setDraggingProject(null)} onClick={() => setSelectedProject(item)}><div className="project-image"><img src={item.image} alt={`${item.title} project preview`} /><button aria-label={`Pin ${item.title}`} className="pin-button" onClick={(event) => event.stopPropagation()}>♧</button></div><div className="project-copy"><div className="project-heading"><h3>{item.title}</h3></div><p>{item.description}</p><div className="project-footer"><div className="tech-list">{item.tech.map((tech) => <span key={tech} title={tech}><TechIcon name={tech} /></span>)}</div><a href="#contact" onClick={(event) => { event.preventDefault(); setSelectedProject(item); }}>View Project</a></div></div></article>)}</div>
+          <div className="section-title"><h2>Projects <sup>(04)</sup></h2><span>01 / 04</span></div>
+          <div className="card-grid project-grid">{orderedProjects.map((item) => <article className={`project-card ${draggingProject === item.title ? "is-dragging" : ""}`} key={item.number} draggable onDragStart={() => setDraggingProject(item.title)} onDragOver={(event) => event.preventDefault()} onDrop={() => moveProject(item.title)} onDragEnd={() => setDraggingProject(null)} onClick={() => openProject(item)}><div className="project-image"><img src={item.image} alt={`${item.title} project preview`} /><button type="button" aria-label={`Pin ${item.title}`} className="pin-button" onClick={(event) => event.stopPropagation()}>♧</button></div><div className="project-copy"><div className="project-heading"><h3>{item.title}</h3></div>{item.title === "GPT-2 Inference" && <span className={`project-status ${item.tone} project-status-visible`}><i />Building</span>}<p>{item.description}</p><div className="project-footer"><div className="tech-list">{item.tech.map((tech) => <span key={tech} title={tech}><TechIcon name={tech} /></span>)}</div><a href="#contact" onClick={(event) => { event.preventDefault(); event.stopPropagation(); openProject(item); }}>View Project</a></div></div></article>)}</div>
         </section>
 
         <div className="stripe" />
@@ -337,8 +350,6 @@ export default function Home() {
           <div className="skills-heading"><h2>Skills &amp; Technologies</h2></div>
           <div className="skills-grid">{skills.map((skill) => <span key={skill}><SkillIcon name={skill} />{skill}</span>)}</div>
         </section>
-
-        <LLMInferenceFlow />
 
         <section className="support" id="contact"><div><span className="eyebrow">Have a good idea?</span><h2>Let&apos;s make it real.</h2></div><a href="mailto:nitin@nitinyadav.dev">Say hello</a></section>
         <footer>
@@ -349,7 +360,7 @@ export default function Home() {
 
       <button className="back-top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} aria-label="Back to top">↑</button>
       {showSearch && <div className="search-overlay" onClick={() => setShowSearch(false)}><div className="search-dialog navigation-dialog" onClick={(event) => event.stopPropagation()}><div className="navigation-header"><span className="navigation-icon">▦</span><div><strong>Navigation Menu</strong><small>Quickly jump to sections or actions</small></div><button onClick={() => setShowSearch(false)} aria-label="Close navigation">×</button></div><div className="navigation-search"><span className="magnifier" /><input autoFocus placeholder="Search for actions..." /></div><p className="navigation-label">Sections</p><div className="navigation-list">{[["▥", "Experience", "shift + E", "#about"], ["‹›", "Projects", "shift + P", "#projects"], ["▤", "Blogs", "shift + B", "#projects"], ["●", "Open Source", "shift + O", "#opensource"], ["▱", "Skills", "shift + S", "#skills"]].map(([icon, label, shortcut, href]) => <a key={label} href={href} onClick={() => setShowSearch(false)}><span className="navigation-item-icon">{icon}</span><span>{label}</span><kbd>{shortcut}</kbd></a>)}</div><div className="navigation-footer"><span>Navigate</span><span>select</span><span>esc to close</span></div></div></div>}
-      {selectedProject && <div className="project-detail-overlay"><div className="project-detail-page"><div className="project-detail-top"><button className="detail-back" onClick={() => setSelectedProject(null)}>Back</button><div><h2>{selectedProject.title}</h2><p>Projects / {selectedProject.title}</p></div><span className={`project-status ${selectedProject.tone}`}><i />{selectedProject.status}</span></div><div className="detail-media"><img src={selectedProject.image} alt={`${selectedProject.title} project preview`} /><span className="detail-play">▶</span></div><div className="detail-actions">{selectedProject.github && <a href={selectedProject.github} target="_blank" rel="noreferrer">◉ Github</a>}{selectedProject.website && <a href={selectedProject.website} target="_blank" rel="noreferrer">Website</a>}<a href="#contact">✉ Contact</a></div><div className="detail-summary"><div><h1>{selectedProject.title}</h1><p>{selectedProject.description}</p></div><div><h3>Stack used</h3><div className="detail-stack">{selectedProject.tech.map((tech) => <span key={tech}><TechIcon name={tech} />{tech}</span>)}</div></div></div></div></div>}
+      {selectedProject && <div className="project-detail-overlay" onClick={(event) => { if (event.target === event.currentTarget) closeProject(); }}><div className="project-detail-page"><div className="project-detail-top"><button type="button" className="detail-back" onClick={closeProject} aria-label="Back to projects">← Back</button><div><h2>{selectedProject.title}</h2><p>Projects / {selectedProject.title}</p></div><span className={`project-status ${selectedProject.tone}`}><i />{selectedProject.status}</span></div><div className="detail-media"><img src={selectedProject.image} alt={`${selectedProject.title} project preview`} /><span className="detail-play">▶</span></div><div className="detail-actions">{selectedProject.github && <a href={selectedProject.github} target="_blank" rel="noreferrer">◉ Github</a>}{selectedProject.website && <a href={selectedProject.website} target="_blank" rel="noreferrer">Website</a>}<a href="#contact">✉ Contact</a></div><div className="detail-summary"><div><h1>{selectedProject.title}</h1><p>{selectedProject.description}</p></div><div><h3>Stack used</h3><div className="detail-stack">{selectedProject.tech.map((tech) => <span key={tech}><TechIcon name={tech} />{tech}</span>)}</div></div></div></div></div>}
     </main>
   );
 }

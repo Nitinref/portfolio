@@ -15,12 +15,11 @@ type Project = {
 
 const projects: Project[] = [
   { title: "Sigato", subtitle: "Terminal AI Agent", description: "A terminal AI agent that plans and executes multi-step tasks with approval at every step.", image: "/sigato.png", status: "Live", tech: ["Next.js", "React", "TypeScript"], live: "https://sigato.vercel.app/", github: "https://github.com/Nitinref/Sigato" },
+  { title: "GPT-2 Inference", subtitle: "Transformer Inference Engine", description: "A from-scratch GPT-2 inference project in C++ and Python, using PyTorch to explore transformer generation, token sampling, and deep-learning performance.", image: "/GPT.png", status: "Building", tech: ["C++", "Python", "PyTorch", "Deep Learning"] },
   { title: "Seezer.ai", subtitle: "AI Website Builder", description: "An AI-powered website builder that turns plain English prompts into production-ready React applications.", image: "/seezer.png", status: "Building", tech: ["Next.js", "AI", "TypeScript"] },
-  { title: "DrawXL", subtitle: "Collaborative Whiteboard", description: "A real-time collaborative whiteboard inspired by Excalidraw, with live stroke syncing and persistence.", image: "/drawxl.png", status: "Building", tech: ["Canvas", "WebSockets", "Prisma"] },
   { title: "Doco", subtitle: "Container Deployment Engine", description: "Deploy any Docker image and get a live subdomain instantly.", image: "/doco.png", status: "Live", tech: ["Node.js", "Next.js", "AWS"], github: "https://github.com/Nitinref/Doco" },
   { title: "Personal Knowledge Base", subtitle: "Coming Soon", description: "A private space for notes, bookmarks, and ideas that stays fast and searchable.", status: "Coming Soon", tech: ["Next.js", "PostgreSQL"] },
   { title: "Realtime Code Rooms", subtitle: "Coming Soon", description: "Shared coding rooms with presence, previews, and lightweight collaboration tools.", status: "Coming Soon", tech: ["React", "WebSockets"] },
-  { title: "GPT-2 Inference", subtitle: "Coming Soon", description: "A from-scratch GPT-2 inference project focused on understanding transformer generation and performance.", status: "Coming Soon", tech: ["Python", "PyTorch", "Transformers"] },
   { title: "More Experiments", subtitle: "Coming Soon", description: "Small, useful experiments currently taking shape in the workshop.", status: "Coming Soon", tech: ["Design", "Prototyping"] },
 ];
 
